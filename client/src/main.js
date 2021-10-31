@@ -1,14 +1,6 @@
-import { createApp } from "vue";
-import App from "./App.vue";
-import router from "./router";
-import Axios from "axios";
+import { createApp } from 'vue'
+import App from './App.vue'
+import router from './router'
+import './assets/tailwind.css'
 
-const axios = Axios.create({
-  baseURL: "http://127.0.0.1:3070",
-  timeout: 10000,
-});
-
-const app = createApp(App);
-app.use(router);
-app.config.globalProperties.$axios = axios;
-app.mount("#app");
+createApp(App).use(router).mount('#app')

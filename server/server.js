@@ -14,15 +14,17 @@ app.use(
 
 // other functions
 const XLSX = require("xlsx");
+const fs = require("fs");
 
 app.get("/", (req, res) => {
   res.send({
     status: true,
   });
 });
-app.post("/hey", (req, res) => {
-  console.log(req.body);
-  res.send("got it");
+app.get("/readExcel", async (req, res) => {
+  let currentWorkBook = XLSX.readFile("./data/share.xlsx");
+  let htmlData = XLSX.utils.sheet_to_html(currentWorkBook.Sheets["main"]);
+  res.send(htmlData);
 });
 app.listen(PORT, HOST, (err) => {
   if (err) {
@@ -33,13 +35,6 @@ app.listen(PORT, HOST, (err) => {
 });
 
 /*
-const XLSX = require('xlsx');
-const fs = require("fs");
-
-let wb = XLSX.readFile("./share.xlsx",{
-    cellHTML:false,
-});
-let mainData =XLSX.utils.sheet_to_json(wb.Sheets["main"]);
 
 
 let validateData = (data)=>{
