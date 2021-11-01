@@ -1,68 +1,44 @@
 <template>
   <div>
-    <nav class="flex items-center justify-evenly flex-wrap bg-yellow-500 p-6">
-      <div
-        class="
-          flex
-          items-center
-          justify-items-start
-          flex-no-shrink
-          text-white
-          mr-6
-        "
-      >
-        <span class="font-semibold text-xl tracking-tight"
-          >Ultimate Nepse analaysis</span
-        >
-      </div>
-      <div class="block sm:hidden">
-        <button
-          @click="toggle"
-          class="
-            flex
-            items-center
-            px-3
-            py-2
-            border
-            rounded
-            text-teal-lighter
-            border-teal-light
-            hover:text-white hover:border-white
-          "
-        >
-          <svg
-            class="fill-current h-3 w-3"
-            viewBox="0 0 20 20"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <title>Menu</title>
-            <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z" />
-          </svg>
-        </button>
-      </div>
-      <div
-        :class="open ? 'block' : 'hidden'"
-        class="w-full flex-grow sm:flex sm:items-center sm:w-auto"
-      >
-        <div class="text-lg sm:flex-grow">
-          <div class="btn-navigation">
-            <router-link to="/dashboard">Dashboard</router-link>
-          </div>
-          <div class="flex">
-            <div class="btn-navigation">General</div>
-            <div class="hidden">
-              <span>First</span>
-              <span>Second</span>
-              <span>Third</span>
-            </div>
-          </div>
-          <div class="btn-navigation">
-            <router-link to="/portfolio"> Portfolio </router-link>
-          </div>
-          <div class="btn-navigation">
-            <router-link to="/blog"> More</router-link>
+    <nav class="flex bg-white shadow-lg items-center">
+      <div class="text-lg text-blue-800 ml-2 mr-2">Ultimate Nepse Analysis</div>
+      <div class="navbar">
+        <router-link to="/dashboard"
+          >Dashboard <fa icon="columns" />
+        </router-link>
+        <div class="subnav">
+          <button class="subnavbtn">General <fa icon="chevron-down" /></button>
+          <div class="subnav-content">
+            <router-link to="/general/import"
+              >Import <fa icon="file-import"
+            /></router-link>
+            <router-link to="/general/compare"> Compare Percentage</router-link>
+            <a href="#careers">Careers</a>
           </div>
         </div>
+        <div class="subnav">
+          <button class="subnavbtn">
+            Services <i class="fa fa-caret-down"></i>
+          </button>
+          <div class="subnav-content">
+            <a href="#bring">Bring</a>
+            <a href="#deliver">Deliver</a>
+            <a href="#package">Package</a>
+            <a href="#express">Express</a>
+          </div>
+        </div>
+        <div class="subnav">
+          <button class="subnavbtn">
+            Partners <i class="fa fa-caret-down"></i>
+          </button>
+          <div class="subnav-content">
+            <a href="#link1">Link 1</a>
+            <a href="#link2">Link 2</a>
+            <a href="#link3">Link 3</a>
+            <a href="#link4">Link 4</a>
+          </div>
+        </div>
+        <router-link to="/about">About</router-link>
       </div>
     </nav>
   </div>
@@ -76,12 +52,78 @@ export default {
       open: false,
     };
   },
-  methods: {
-    toggle() {
-      this.open = !this.open;
-    },
-  },
+  methods: {},
+  mounted: function () {},
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+/* The navigation menu */
+.navbar {
+  overflow: hidden;
+}
+
+/* Navigation links */
+.navbar a {
+  float: left;
+  font-size: 16px;
+  color: rgba(31, 41, 55);
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+/* The subnavigation menu */
+.subnav {
+  float: left;
+  overflow: hidden;
+}
+
+/* Subnav button */
+.subnav .subnavbtn {
+  font-size: 16px;
+  border: none;
+  outline: none;
+  color: rgba(31, 41, 55);
+  padding: 14px 16px;
+  background-color: inherit;
+  font-family: inherit;
+  margin: 0;
+  border-bottom: 5px solid white;
+}
+
+.navbar a:hover,
+.subnavbtn:hover {
+  color: green;
+  border-bottom: 5px solid rgb(7, 202, 7);
+}
+
+/* Style the subnav content - positioned absolute */
+.subnav-content {
+  display: none;
+  position: absolute;
+  left: auto;
+  margin-left: 15px;
+  width: 100%;
+  z-index: 0;
+  box-shadow: 10px 10px 197px -25px rgba(0, 0, 0, 0.81);
+}
+
+/* Style the subnav links */
+.subnav-content a {
+  color: black;
+  text-decoration: none;
+}
+
+/* Add a grey background color on hover */
+.subnav-content a:hover {
+  background-color: #eee;
+  color: black;
+}
+
+/* When you move the mouse over the subnav container, open the subnav content */
+.subnav:hover .subnav-content {
+  width: auto;
+  display: grid;
+}
+</style>
