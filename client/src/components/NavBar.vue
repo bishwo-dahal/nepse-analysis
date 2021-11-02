@@ -12,8 +12,15 @@
             <router-link to="/general/import"
               >Import <fa icon="file-import"
             /></router-link>
-            <router-link to="/general/compare"> Compare Percentage</router-link>
-            <a href="#careers">Careers</a>
+            <router-link to="/general/compare-percent">
+              Compare Percentage <fa icon="percentage"
+            /></router-link>
+            <router-link to="/general/compare-weekly-data">
+              Compare Weekly Data <fa icon="percentage"
+            /></router-link>
+            <router-link to="/general/compare-weekly-percent">
+              Compare Weekly Percentage <fa icon="percentage"
+            /></router-link>
           </div>
         </div>
         <div class="subnav">
@@ -105,7 +112,7 @@ export default {
   left: auto;
   margin-left: 15px;
   width: 100%;
-  z-index: 0;
+  z-index: 10;
   box-shadow: 10px 10px 197px -25px rgba(0, 0, 0, 0.81);
 }
 
@@ -113,6 +120,7 @@ export default {
 .subnav-content a {
   color: black;
   text-decoration: none;
+  background-color: rgba(255, 255, 255, 0.9);
 }
 
 /* Add a grey background color on hover */

@@ -23,9 +23,19 @@ const routes = [
     component: GeneralImport,
   },
   {
-    path: "/general/compare",
+    path: "/general/compare-percent",
     name: "GeneralPercent",
     component: () => import("../views/General/ComparePercent.vue"),
+  },
+  {
+    path: "/general/compare-weekly-data",
+    name: "CompareWeeklyData",
+    component: () => import("../views/General/CompareWeeklyData.vue"),
+  },
+  {
+    path: "/general/compare-weekly-percent",
+    name: "CompareWeeklyPercent",
+    component: () => import("../views/General/CompareWeeklyPercent.vue"),
   },
 ];
 

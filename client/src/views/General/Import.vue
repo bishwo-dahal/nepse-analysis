@@ -1,14 +1,16 @@
 <template>
   <div>
     <title-bar text="Import from Excel(General)" icon="file-import" />
-    <button class="bg-blue-700 button" @click="getGeneral">Import Now</button>
+    <button class="bg-blue-700 button" @click="getGeneral">
+      Refresh The Data
+    </button>
     <div>
       <div class="m-4">
         <label for="date" class="text-yellow-500">Choose Date</label>
         <input type="date" id="date" v-model="date" />
       </div>
       <button class="bg-blue-900 button" @click="importGeneral">
-        Import The Data
+        Import Data
       </button>
     </div>
     <div>
@@ -49,7 +51,7 @@ export default {
   },
   mounted() {
     this.date = new Date().toISOString().slice(0, 10);
-    console.log(this.date);
+    this.getGeneral();
   },
 };
 </script>

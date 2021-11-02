@@ -23,4 +23,7 @@ export default {
   text-align: center;
   color: #2c3e50;
 }
+input[type="date"] {
+  border-bottom: 2px solid rgb(68, 63, 63);
+}
 </style>

@@ -11,4 +11,16 @@
   .button {
     @apply rounded text-white p-3 mb-3  hover:bg-opacity-80 border-2 hover:border-black;
   }
+  .table-title {
+    @apply bg-pink-800   text-gray-300
+           sticky top-0 left-0
+           text-xl hover:text-white
+           border-b-8 border-blue-400 cursor-pointer;
+  }
+  .stock-up {
+    @apply bg-green-300 text-black;
+  }
+  .stock-down {
+    @apply bg-red-400 text-black;
+  }
 }
