@@ -64,38 +64,6 @@
       </div>
     </div>
     <table-view :titles="titles" :postValues="postValues" :datas="results" />
-    <div class="container flex items-center justify-center mt-10">
-      <table width="60%">
-        <tr v-once class="table-title">
-          <td class="p-2">S.No</td>
-          <td>Symbol</td>
-          <td>Open %</td>
-          <td>Close %</td>
-          <td>High %</td>
-          <td>Low %</td>
-          <td>Volume %</td>
-        </tr>
-        <tr v-for="(result, index) in results" :key="result.symbol">
-          <td>{{ index + 1 }}</td>
-          <td>{{ result.symbol }}</td>
-          <td :class="result.open > 0 ? 'stock-up' : 'stock-down'">
-            {{ result.open }}%
-          </td>
-          <td :class="result.close > 0 ? 'stock-up' : 'stock-down'">
-            {{ result.close }}%
-          </td>
-          <td :class="result.high > 0 ? 'stock-up' : 'stock-down'">
-            {{ result.high }}%
-          </td>
-          <td :class="result.low > 0 ? 'stock-up' : 'stock-down'">
-            {{ result.low }}%
-          </td>
-          <td :class="result.vol > 0 ? 'stock-up' : 'stock-down'">
-            {{ result.vol }}%
-          </td>
-        </tr>
-      </table>
-    </div>
   </div>
 </template>
 
