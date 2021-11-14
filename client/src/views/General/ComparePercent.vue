@@ -63,6 +63,7 @@
         </span>
       </div>
     </div>
+    <table-view :titles="titles" :postValues="postValues" :datas="results" />
     <div class="container flex items-center justify-center mt-10">
       <table width="60%">
         <tr v-once class="table-title">
@@ -99,9 +100,10 @@
 </template>
 
 <script>
-import TitleBar from "../../components/TitleBar.vue";
+import TitleBar from "@/components/TitleBar.vue";
+import TableView from "@/components/TableView.vue";
 export default {
-  components: { TitleBar },
+  components: { TitleBar, TableView },
   name: "ComparePercent",
   data() {
     return {
@@ -110,6 +112,8 @@ export default {
       sortBy: "open",
       sortMethod: "ascending",
       results: [],
+      postValues: ["", "%", "%", "%", "%", "%"],
+      titles: ["Symbol", "Open %", "Close %", "High %", "Low %", "Volume %"],
     };
   },
   methods: {
@@ -119,6 +123,7 @@ export default {
       );
       if (result.data.status == 200) {
         this.results = result.data.data;
+        console.log(this.results, "is the result passed");
       }
     },
     sort: function () {

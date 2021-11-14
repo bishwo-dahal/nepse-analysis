@@ -10,8 +10,12 @@
         </tr>
         <tr v-for="(data, index) in datas" :key="data.symbol">
           <td>{{ index + 1 }}</td>
-          <td :class="data[titleValues[index]] > 0 ? 'stock-up' : 'stock-down'">
-            {{ data[titleValues[index]] }}
+          <td
+            v-for="(currData, index) in Object.values(data)"
+            :class="calcClass(currData)"
+            :key="index"
+          >
+            {{ currData }}{{ postValues[index] }}
           </td>
         </tr>
       </table>
@@ -21,7 +25,7 @@
 
 <script>
 export default {
-  prps: {
+  props: {
     titles: {
       type: Array,
       required: true,
@@ -30,9 +34,24 @@ export default {
       type: Array,
       required: true,
     },
-    titleValues: {
+    postValues: {
       type: Array,
       required: true,
+    },
+  },
+  methods: {
+    calcClass: function (val) {
+      if (typeof val == "undefined" || isNaN(+val)) {
+        return "stock-blank";
+      }
+      if (isNaN(+val)) {
+        return "stock-blank";
+      }
+      if (+val > 0) {
+        return "stock-up";
+      } else {
+        return "stock-down";
+      }
     },
   },
 };

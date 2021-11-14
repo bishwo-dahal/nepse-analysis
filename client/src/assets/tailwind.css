@@ -23,4 +23,7 @@
   .stock-down {
     @apply bg-red-400 text-black;
   }
+  .stock-blank {
+    /* @apply bg-black; */
+  }
 }
