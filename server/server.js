@@ -20,9 +20,9 @@ const { QueryTypes, Sequelize } = require("sequelize");
 //local files
 const db = require("./models");
 db.sequelize.authenticate();
+// db.sequelize.sync({ alter: true });
 
-//routes
-app.use("/general", require("./routes/general/index"));
+app.use("/", require("./routes/routes"));
 
 app.get("/", (req, res) => {
   res.send({

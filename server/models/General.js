@@ -8,6 +8,10 @@ module.exports = {
   symbol: {
     type: DataTypes.STRING,
     allowNull: false,
+    references: {
+      model: "companies",
+      key: "symbol",
+    },
   },
   date: {
     type: DataTypes.DATEONLY,
