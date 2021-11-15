@@ -14,13 +14,16 @@ let Company = sequelize.define("Company", require("./Company"), {
   tableName: "companies",
   timestamps: false,
 });
-Company.hasMany(General);
-let TradedDate = sequelize.define("Traded", require("./TradedDate"), {
-  tableName: "traded_date",
+let TradedDate = sequelize.define("Traded", require("./Traded"), {
+  tableName: "traded",
   timestamps: false,
 });
+
+// Company.hasMany(General);
+// TradedDate.hasMany(General);
+
 db.sequelize = sequelize;
 db.General = General;
 db.Company = Company;
-db.TradedDate = TradedDate;
+db.Traded = TradedDate;
 module.exports = db;

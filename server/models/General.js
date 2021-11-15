@@ -6,7 +6,7 @@ module.exports = {
     autoIncrement: true,
   },
   symbol: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(30),
     allowNull: false,
     references: {
       model: "companies",
@@ -16,6 +16,10 @@ module.exports = {
   date: {
     type: DataTypes.DATEONLY,
     allowNull: false,
+    references: {
+      model: "traded",
+      key: "date",
+    },
   },
   stock_confidence: {
     type: DataTypes.DECIMAL(10, 2),
@@ -42,7 +46,7 @@ module.exports = {
     allowNull: false,
   },
   vol: {
-    type: DataTypes.DECIMAL(8, 2),
+    type: DataTypes.DECIMAL(10, 2),
     allowNull: false,
   },
   prev_close: {
@@ -50,10 +54,14 @@ module.exports = {
     allowNull: false,
   },
   turnover: {
-    type: DataTypes.DECIMAL(8, 2),
+    type: DataTypes.DECIMAL(12, 2),
     allowNull: false,
   },
   trans: {
+    type: DataTypes.DECIMAL(8, 2),
+    allowNull: false,
+  },
+  diff: {
     type: DataTypes.DECIMAL(8, 2),
     allowNull: false,
   },

@@ -60,7 +60,7 @@ Router.put("/update/:symbol", async (req, res) => {
   if (currentError.length == 0) {
     res.status(200).send({ status: 200, result: companyReceived });
   } else {
-    res.status(422).send({ status: 422, error: currentError });
+    res.status(422).send({ status: 422, errors: currentError });
   }
 });
 module.exports = Router;

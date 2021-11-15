@@ -13,6 +13,7 @@ let validateData = (data) => {
   }
   return data;
 };
+
 let getQuery = (data, date) => {
   data = validateData(data);
   let query = `('${data["Symbol"]}','${date}',${data["Conf."]},${data["Open"]},${data["High"]},${data["Low"]},${data["Close"]},${data["VWAP"]},${data["Vol"]},${data["Prev. Close"]},${data["Turnover"]},${data["Trans."]},${data["Diff"]}
@@ -32,4 +33,28 @@ let generateQuery = (jsonData, date) => {
   return query;
 };
 
-module.exports = { generateQuery };
+module.exports = {
+  generateQuery,
+  jsonCompanyData: {
+    Symbol: "",
+    "Conf.": 0,
+    Open: 0,
+    High: 0,
+    Low: 0,
+    Close: 0,
+    VWAP: 0,
+    Vol: 0,
+    "Prev. Close": 0,
+    Turnover: 0,
+    "Trans.": 0,
+    Diff: 0,
+    Range: 0,
+    "Diff %": 0,
+    "Range %": 0,
+    "VWAP %": 0,
+    "52 Weeks High": 0,
+    "52 Weeks Low": 0,
+    "120 Days": 0,
+    "180 Days": 0,
+  },
+};
