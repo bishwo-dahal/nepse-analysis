@@ -72,7 +72,10 @@ export default {
         alert("Your data was imported successfully");
       } else if (result.data.status == 400) {
         this.response = false;
-        alert(result.data.message);
+        let err = result.data.errors;
+        // let err = new String[result.data.errors.length]();
+        // err.concat(err);
+        alert("Cannnot import DATA 😎🤢\n" + err[0]);
       }
     },
   },

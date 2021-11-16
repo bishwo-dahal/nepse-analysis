@@ -106,7 +106,7 @@ Router.post("/import", async (req, res) => {
       raw: true,
     });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     currentErrors.push(error);
   }
   console.log("lastTRADED = ", lastTraded);
@@ -118,10 +118,9 @@ Router.post("/import", async (req, res) => {
   try {
     await db.Traded.create(tradedValues);
   } catch (error) {
-    console.log(error);
     currentErrors.push("DATE " + errors.NOT_UNIQUE);
   }
-  if (lastTradedDate) {
+  if (lastTradedDate && currentErrors.length == 0) {
     console.log("last tradeddate is ", lastTradedDate);
     let leftData = [];
     try {
@@ -134,24 +133,22 @@ Router.post("/import", async (req, res) => {
         },
         raw: true,
       });
+      leftData.forEach(async (res) => {
+        let jsonCompany = jsonCompanyData;
+        jsonCompany["symbol"] = res["symbol"];
+        jsonCompany["open"] = res["open"] || 0;
+        jsonCompany["high"] = res["high"] || 0;
+        jsonCompany["low"] = res["low"] || 0;
+        jsonCompany["close"] = res["close"] || 0;
+        jsonCompany["date"] = date;
+        await db.General.create(jsonCompany);
+      });
     } catch (error) {
-      console.log(error);
       currentErrors.push(error[0].message);
     }
-
-    leftData.forEach(async (res) => {
-      let jsonCompany = jsonCompanyData;
-      jsonCompany["symbol"] = res["symbol"];
-      jsonCompany["open"] = res["open"] || 0;
-      jsonCompany["high"] = res["high"] || 0;
-      jsonCompany["low"] = res["low"] || 0;
-      jsonCompany["close"] = res["close"] || 0;
-      jsonCompany["date"] = date;
-      await db.General.create(jsonCompany);
-    });
   }
 
-  if (!lastTradedDate) {
+  if (!lastTradedDate && currentErrors.length == 0) {
     console.log("last traded data is not found", noDataCompanies);
     noDataCompanies.forEach(async (company) => {
       let jsonCompany = jsonCompanyData;
@@ -175,7 +172,7 @@ Router.post("/import", async (req, res) => {
       updated: noDataCompanies,
     });
   } else {
-    res.status(400).send({
+    res.send({
       status: 400,
       errors: currentErrors,
     });
