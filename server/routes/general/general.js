@@ -20,6 +20,7 @@ Router.post("/import", async (req, res) => {
     currentWorkBook.Sheets[currentWorkBook.SheetNames[0]]
   );
   let date = req.body.date;
+
   let allRequiredCompanies = [];
   try {
     allRequiredCompanies = await db.Company.findAll({
@@ -45,10 +46,7 @@ Router.post("/import", async (req, res) => {
   extraCompanies = availableCompanies.filter(
     (comp) => !requiredCompanies.includes(comp)
   );
-
-  console.log(jsonData.length);
-  console.log(noDataCompanies);
-  console.log(extraCompanies);
+  //filtering companies on basis of logic
 
   let totalVolume = 0;
   let totalTurnOver = 0;
@@ -57,24 +55,19 @@ Router.post("/import", async (req, res) => {
     totalTurnOver += +result["Turnover"];
   });
 
+  /*
+  Get necessary data
+  Insert  date in traded
+  If new companies are added then create or update with status active instrument equity and sectors other
+  If companies data are not present, get their last date data, create new data with specific values copied post data 
+  */
+
   let tradedValues = {
     companies: availableCompanies.length,
     date,
     volume: totalVolume,
     turnover: totalTurnOver,
   };
-  let lastTraded = await db.Traded.findOne({
-    attributes: ["date"],
-    order: [["date", "DESC"]],
-    raw: true,
-  });
-  let lastTradedDate = "";
-  if (lastTraded) {
-    console.log("last traded is given by ", lastTraded);
-    lastTradedDate = lastTraded["date"];
-  } else {
-    lastTradedDate = false;
-  }
 
   // for those which are added today only
   extraCompanies.forEach(async (company) => {
@@ -90,6 +83,7 @@ Router.post("/import", async (req, res) => {
     try {
       await db.Company.create(currentCompany);
     } catch (error) {
+      console.log(error);
       currentErrors.push(error[0].message);
       await db.Company.update(
         { status: "Active" },
@@ -103,9 +97,35 @@ Router.post("/import", async (req, res) => {
   });
 
   // for those which are not available
+  let lastTradedDate;
+  let lastTraded;
   try {
-    if (lastTradedDate) {
-      let leftData = await db.General.findAll({
+    lastTraded = await db.Traded.findOne({
+      attributes: ["date"],
+      order: [["date", "DESC"]],
+      raw: true,
+    });
+  } catch (error) {
+    console.log(error);
+    currentErrors.push(error);
+  }
+  console.log("lastTRADED = ", lastTraded);
+  if (lastTraded) {
+    lastTradedDate = lastTraded["date"];
+  } else {
+    lastTraded = true;
+  }
+  try {
+    await db.Traded.create(tradedValues);
+  } catch (error) {
+    console.log(error);
+    currentErrors.push("DATE " + errors.NOT_UNIQUE);
+  }
+  if (lastTradedDate) {
+    console.log("last tradeddate is ", lastTradedDate);
+    let leftData = [];
+    try {
+      leftData = await db.General.findAll({
         where: {
           symbol: {
             [Op.or]: noDataCompanies,
@@ -114,49 +134,45 @@ Router.post("/import", async (req, res) => {
         },
         raw: true,
       });
-      leftData.forEach((res) => {
-        let jsonCompany = jsonCompanyData;
-        jsonCompany["Symbol"] = res["symbol"];
-        jsonCompany["Open"] = res["open"] || 0;
-        jsonCompany["High"] = res["high"] || 0;
-        jsonCompany["Low"] = res["low"] || 0;
-        jsonCompany["Close"] = res["close"] || 0;
-        jsonData.push(jsonCompany);
-      });
-    } else {
-      noDataCompanies.forEach((company) => {
-        let jsonCompany = jsonCompanyData;
-        jsonCompany["Symbol"] = company;
-        jsonData.push(jsonCompany);
-      });
+    } catch (error) {
+      console.log(error);
+      currentErrors.push(error[0].message);
     }
-  } catch (error) {
-    currentErrors.push(error[0].message);
+
+    leftData.forEach(async (res) => {
+      let jsonCompany = jsonCompanyData;
+      jsonCompany["symbol"] = res["symbol"];
+      jsonCompany["open"] = res["open"] || 0;
+      jsonCompany["high"] = res["high"] || 0;
+      jsonCompany["low"] = res["low"] || 0;
+      jsonCompany["close"] = res["close"] || 0;
+      jsonCompany["date"] = date;
+      await db.General.create(jsonCompany);
+    });
   }
 
-  /*
-  Get necessary data
-  Insert  date in traded
-  If new companies are added then create or update with status active instrument equity and sectors other
-  If companies data are not present, get their last date data, create new data with specific values copied post data 
-  */
-  try {
-    await db.Traded.create(tradedValues);
-  } catch (error) {
-    currentErrors.push("DATE " + errors.NOT_UNIQUE);
+  if (!lastTradedDate) {
+    console.log("last traded data is not found", noDataCompanies);
+    noDataCompanies.forEach(async (company) => {
+      let jsonCompany = jsonCompanyData;
+      jsonCompany["symbol"] = company.toUpperCase();
+      jsonCompany["date"] = date;
+      await db.General.create(jsonCompany);
+      // console.log(jsonCompany);
+    });
   }
-
   if (currentErrors.length == 0) {
+    console.log("json data reached end");
     let query = generateQuery(jsonData, date);
     try {
       await db.sequelize.query(query, { type: QueryTypes.INSERT });
     } catch (error) {
       currentErrors.push(error);
-      console.log("ERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR");
     }
     res.send({
       status: 200,
-      currentErrors,
+      created: extraCompanies,
+      updated: noDataCompanies,
     });
   } else {
     res.status(400).send({
