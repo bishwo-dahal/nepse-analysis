@@ -12,7 +12,37 @@ Router.get("/html", (req, res) => {
   );
   res.send(htmlData);
 });
-
+Router.get("/tradedDate", async (req, res) => {
+  let noOfDate = 5;
+  let currentErrors = [];
+  let result;
+  try {
+    if (+req.query.l < 10) {
+      noOfDate = +req.query.l;
+    } else {
+      noOfDate = 5;
+    }
+    result = await db.Traded.findAll({
+      attributes: ["date"],
+      order: [["date", "DESC"]],
+      limit: noOfDate,
+    });
+    result = result.map((res) => res.date);
+  } catch (error) {
+    currentErrors.push("can't fetch data");
+  }
+  if (currentErrors.length == 0) {
+    res.status(200).send({
+      status: 200,
+      result,
+    });
+  } else {
+    res.send({
+      status: 400,
+      errors: currentErrors,
+    });
+  }
+});
 Router.post("/import", async (req, res) => {
   let currentErrors = [];
   let currentWorkBook = XLSX.readFile("./data/share.xlsx");
@@ -162,7 +192,10 @@ Router.post("/import", async (req, res) => {
     console.log("json data reached end");
     let query = generateQuery(jsonData, date);
     try {
-      await db.sequelize.query(query, { type: QueryTypes.INSERT });
+      await db.sequelize.query(query, {
+        type: QueryTypes.INSERT,
+        logging: false,
+      });
     } catch (error) {
       currentErrors.push(error);
     }

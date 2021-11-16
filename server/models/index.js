@@ -4,7 +4,7 @@ let db = {};
 let sequelize = new Sequelize("nepse_general", "root", "" /**/, {
   dialect: "mysql",
   host: "localhost",
-  logging: false,
+  logging: console.log,
 });
 let General = sequelize.define("General", require("./General"), {
   tableName: "general",
