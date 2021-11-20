@@ -51,70 +51,67 @@ Router.post("/import", async (req, res) => {
   );
   let date = req.body.date;
 
-  let allRequiredCompanies = [];
+  let extraCompanies = [];
+  let noDataCompanies = [];
+
   try {
-    allRequiredCompanies = await db.Company.findAll({
+    let allRequiredCompanies = await db.Company.findAll({
       attributes: ["symbol"],
       where: {
         status: "Active",
       },
       raw: true,
     });
-  } catch (error) {
-    currentErrors.push(error);
-  }
+    let requiredCompanies = allRequiredCompanies.map((result) => result.symbol);
+    let availableCompanies = jsonData.map((result) => result["Symbol"]);
 
-  let noDataCompanies = [];
-  let requiredCompanies = allRequiredCompanies.map((result) => result.symbol);
-  let availableCompanies = jsonData.map((result) => result["Symbol"]);
-  let extraCompanies = [];
+    noDataCompanies = requiredCompanies.filter(
+      (comp) => !availableCompanies.includes(comp)
+    );
 
-  noDataCompanies = requiredCompanies.filter(
-    (comp) => !availableCompanies.includes(comp)
-  );
+    //filtering companies on basis of logic
 
-  extraCompanies = availableCompanies.filter(
-    (comp) => !requiredCompanies.includes(comp)
-  );
-  //filtering companies on basis of logic
+    let totalVolume = 0;
+    let totalTurnOver = 0;
+    jsonData.forEach((result) => {
+      totalVolume += +result["Vol"];
+      totalTurnOver += +result["Turnover"];
+    });
 
-  let totalVolume = 0;
-  let totalTurnOver = 0;
-  jsonData.forEach((result) => {
-    totalVolume += +result["Vol"];
-    totalTurnOver += +result["Turnover"];
-  });
+    /*
+    Get necessary data
+    Insert  date in traded
+    If new companies are added then create or update with status active instrument equity and sectors other
+    If companies data are not present, get their last date data, create new data with specific values copied post data 
+    */
 
-  /*
-  Get necessary data
-  Insert  date in traded
-  If new companies are added then create or update with status active instrument equity and sectors other
-  If companies data are not present, get their last date data, create new data with specific values copied post data 
-  */
-
-  let tradedValues = {
-    companies: availableCompanies.length,
-    date,
-    volume: totalVolume,
-    turnover: totalTurnOver,
-  };
-
-  // for those which are added today only
-  extraCompanies.forEach(async (company) => {
-    let currentCompany = {
-      symbol: company,
-      status: "Active",
-      name: company,
-      sector: "Others",
-      instrument: "Equity",
-      website: "",
+    let tradedValues = {
+      companies: availableCompanies.length,
+      date,
+      volume: totalVolume,
+      turnover: totalTurnOver,
     };
-    //maybe there can be better code for this
-    try {
+
+    // for those which are added today only
+    extraCompanies = availableCompanies.filter((comp) => {
+      console.log(comp);
+      return !requiredCompanies.includes(comp);
+    });
+    console.log(availableCompanies, requiredCompanies, extraCompanies);
+    extraCompanies.forEach(async (company) => {
+      console.log("company name is ", company);
+      let currentCompany = {
+        symbol: company,
+        status: "Active",
+        name: company,
+        sector: "Others",
+        instrument: "Equity",
+        website: "",
+      };
+      //maybe there can be better code for this
+
       await db.Company.create(currentCompany);
-    } catch (error) {
-      console.log(error);
-      currentErrors.push(error[0].message);
+
       await db.Company.update(
         { status: "Active" },
         {
@@ -123,37 +120,29 @@ Router.post("/import", async (req, res) => {
           },
         }
       );
-    }
-  });
+    });
+    // for those which are not available
+    let lastTradedDate;
+    let lastTraded;
 
-  // for those which are not available
-  let lastTradedDate;
-  let lastTraded;
-  try {
     lastTraded = await db.Traded.findOne({
       attributes: ["date"],
       order: [["date", "DESC"]],
       raw: true,
     });
-  } catch (error) {
-    // console.log(error);
-    currentErrors.push(error);
-  }
-  console.log("lastTRADED = ", lastTraded);
-  if (lastTraded) {
-    lastTradedDate = lastTraded["date"];
-  } else {
-    lastTraded = true;
-  }
-  try {
+
+    console.log("lastTRADED = ", lastTraded);
+    if (lastTraded) {
+      lastTradedDate = lastTraded["date"];
+    } else {
+      lastTraded = true;
+    }
+
     await db.Traded.create(tradedValues);
-  } catch (error) {
-    currentErrors.push("DATE " + errors.NOT_UNIQUE);
-  }
-  if (lastTradedDate && currentErrors.length == 0) {
-    console.log("last tradeddate is ", lastTradedDate);
-    let leftData = [];
-    try {
+
+    if (lastTradedDate) {
+      console.log("last tradeddate is ", lastTradedDate);
+      let leftData = [];
       leftData = await db.General.findAll({
         where: {
           symbol: {
@@ -173,32 +162,30 @@ Router.post("/import", async (req, res) => {
         jsonCompany["date"] = date;
         await db.General.create(jsonCompany);
       });
-    } catch (error) {
-      currentErrors.push(error[0].message);
     }
-  }
 
-  if (!lastTradedDate && currentErrors.length == 0) {
-    console.log("last traded data is not found", noDataCompanies);
-    noDataCompanies.forEach(async (company) => {
-      let jsonCompany = jsonCompanyData;
-      jsonCompany["symbol"] = company.toUpperCase();
-      jsonCompany["date"] = date;
-      await db.General.create(jsonCompany);
-      // console.log(jsonCompany);
-    });
-  }
-  if (currentErrors.length == 0) {
+    if (!lastTradedDate) {
+      console.log("last traded data is not found", noDataCompanies);
+      noDataCompanies.forEach(async (company) => {
+        let jsonCompany = jsonCompanyData;
+        jsonCompany["symbol"] = company.toUpperCase();
+        jsonCompany["date"] = date;
+        await db.General.create(jsonCompany);
+        // console.log(jsonCompany);
+      });
+    }
     console.log("json data reached end");
     let query = generateQuery(jsonData, date);
-    try {
-      await db.sequelize.query(query, {
-        type: QueryTypes.INSERT,
-        logging: false,
-      });
-    } catch (error) {
-      currentErrors.push(error);
-    }
+    await db.sequelize.query(query, {
+      type: QueryTypes.INSERT,
+      logging: false,
+    });
+  } catch (error) {
+    console.log(error);
+    currentErrors.push(error);
+  }
+
+  if (currentErrors.length == 0) {
     res.send({
       status: 200,
       created: extraCompanies,
@@ -246,25 +233,49 @@ Router.get("/compare-percent", async (req, res) => {
     if (matchedData) {
       let currentData = {};
       currentData["symbol"] = matchedData.symbol;
-      currentData.open = (
-        ((matchedData.open - res.open) / res.open) *
-        100
-      ).toFixed(2);
-      currentData.close = (
-        ((matchedData.close - res.close) / res.close) *
-        100
-      ).toFixed(2);
-      currentData.high = (
-        ((matchedData.high - res.high) / res.high) *
-        100
-      ).toFixed(2);
-      currentData.low = (((matchedData.low - res.low) / res.low) * 100).toFixed(
-        2
-      );
-      currentData.vol = (((matchedData.vol - res.vol) / res.vol) * 100).toFixed(
-        2
-      );
-      console.log(currentData);
+
+      if (res.open == 0) {
+        currentData.open = 0;
+      } else {
+        currentData.open = (
+          ((matchedData.open - res.open) / res.open) *
+          100
+        ).toFixed(2);
+      }
+      if (res.close == 0) {
+        currentData.close = 0;
+      } else {
+        currentData.close = (
+          ((matchedData.close - res.close) / res.close) *
+          100
+        ).toFixed(2);
+      }
+      if (res.high == 0) {
+        currentData.high = 0;
+      } else {
+        currentData.high = (
+          ((matchedData.high - res.high) / res.high) *
+          100
+        ).toFixed(2);
+      }
+
+      if (res.low == 0) {
+        currentData.low = 0;
+      } else {
+        currentData.low = (
+          ((matchedData.low - res.low) / res.low) *
+          100
+        ).toFixed(2);
+      }
+      if (res.vol == 0) {
+        currentData.vol = 0;
+      } else {
+        currentData.vol = (
+          ((matchedData.vol - res.vol) / res.vol) *
+          100
+        ).toFixed(2);
+      }
+
       data.push(currentData);
     }
   });

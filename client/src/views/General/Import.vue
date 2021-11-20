@@ -53,7 +53,7 @@
               v-for="company in created"
               :key="company"
             >
-              {{ company }}{{ created.length }}
+              {{ company }}
             </span>
           </div>
         </div>
