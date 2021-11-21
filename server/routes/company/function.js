@@ -6,6 +6,7 @@ let companyFromReq = (req) => {
     sector: req.body.sector,
     instrument: req.body.instrument,
     website: req.body.website,
+    info: req.body.info,
   };
 };
 let validateCompany = function (company) {

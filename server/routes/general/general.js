@@ -269,6 +269,7 @@ Router.get("/compare-percent", async (req, res) => {
       }
       if (res.vol == 0) {
         currentData.vol = 0;
+        if (matchedData.vol != 0) currentData.vol = 100;
       } else {
         currentData.vol = (
           ((matchedData.vol - res.vol) / res.vol) *

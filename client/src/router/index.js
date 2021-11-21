@@ -37,6 +37,11 @@ const routes = [
     name: "CompareWeeklyPercent",
     component: () => import("../views/General/CompareWeeklyPercent.vue"),
   },
+  {
+    path: "/company/update",
+    name: "UpdateCompany",
+    component: () => import("../views/Company/Update.vue"),
+  },
 ];
 
 const router = createRouter({

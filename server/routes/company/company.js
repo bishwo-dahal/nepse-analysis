@@ -4,17 +4,17 @@ const errors = require("../../errors/");
 const { DataTypes, Op } = require("sequelize");
 
 const { validateCompany, companyFromReq } = require("./function");
+const { getResponse } = require("../../response");
 
 Router.get("/:name", async (req, res) => {
-  const companyData = await db.Company.findAll({
+  const companyData = await db.Company.findOne({
     where: {
       symbol: req.params.name,
     },
     raw: true,
   });
-  console.log(companyData);
 
-  res.send(companyData);
+  res.send(getResponse([], companyData));
 });
 
 Router.post("/post", async (req, res) => {

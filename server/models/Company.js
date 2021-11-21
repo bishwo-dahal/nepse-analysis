@@ -30,4 +30,7 @@ module.exports = {
   website: {
     type: DataTypes.STRING,
   },
+  info: {
+    type: DataTypes.TEXT,
+  },
 };
