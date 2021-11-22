@@ -4,6 +4,7 @@ const { jsonCompanyData, generateQuery } = require("./function");
 const db = require("../../models/index.js");
 const { QueryTypes, Op } = require("sequelize");
 const errors = require("../../errors");
+const { getResponse } = require("../../response");
 
 Router.get("/html", (req, res) => {
   let currentWorkBook = XLSX.readFile("./data/share.xlsx");
@@ -43,6 +44,32 @@ Router.get("/tradedDate", async (req, res) => {
     });
   }
 });
+
+let lastSevenData = async (dates) => {
+  return await db.General.findAll({
+    attributes: ["date", "symbol", "open", "close", "high", "low", "vol"],
+    where: {
+      date: {
+        [Op.or]: dates,
+      },
+    },
+    order: [
+      ["symbol", "ASC"],
+      ["date", "DESC"],
+    ],
+    raw: true,
+  });
+};
+let allCompanies = async () => {
+  let companies = await db.Company.findAll({
+    attributes: ["symbol"],
+    order: [["symbol", "ASC"]],
+    raw: true,
+  });
+  let onlyCompanies = companies.map((company) => company.symbol);
+  return onlyCompanies;
+};
+
 Router.post("/import", async (req, res) => {
   let currentErrors = [];
   let currentWorkBook = XLSX.readFile("./data/share.xlsx");
@@ -285,6 +312,48 @@ Router.get("/compare-percent", async (req, res) => {
     status: 200,
     data,
   });
+});
+
+Router.get("/compare-weekly", async (req, res) => {
+  let currentErrors = [];
+  let result = { dates: [], values: {} };
+  /*
+  "ABC":[
+    {
+      date:1,
+      open:100,
+      close:200
+    },
+    {
+      date:2,
+      open:150,
+      close:250
+    }
+  ]
+  */
+
+  try {
+    let lastSeven = await db.Traded.findAll({
+      order: [["date", "DESC"]],
+      raw: true,
+      limit: 7,
+    });
+    let lastSevenDate = lastSeven.map((date) => date.date);
+    result.dates = lastSevenDate;
+    let companies = await allCompanies();
+    let lastSevenResult = await lastSevenData(lastSevenDate);
+    for (const company of companies) {
+      let filteredCompany = lastSevenResult.filter(
+        (data) => data.symbol == company
+      );
+      result.values[company] = [];
+      result.values[company].push(...filteredCompany);
+    }
+  } catch (error) {
+    console.log(error);
+    currentErrors.push(error);
+  }
+  res.send(getResponse(currentErrors, result));
 });
 
 module.exports = Router;

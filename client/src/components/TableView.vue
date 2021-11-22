@@ -1,9 +1,10 @@
 <template>
   <div>
     <div class="container flex items-center justify-center mt-10">
-      <table width="60%">
-        <tr v-once class="table-title">
+      <table :width="width + '%'">
+        <tr class="table-title">
           <td class="p-2">S.No</td>
+
           <td v-for="(title, index) in titles" :key="index">
             {{ title }}
           </td>
@@ -37,6 +38,10 @@ export default {
     postValues: {
       type: Array,
       required: true,
+    },
+    width: {
+      type: Number,
+      default: 60,
     },
   },
   methods: {

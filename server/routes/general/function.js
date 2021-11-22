@@ -36,6 +36,15 @@ let jsonCompanyData = {
   a52_weeks_high: 0,
   a52_weeks_low: 0,
 };
+
+let compareWeekTemplate = {
+  date: "",
+  open: 0,
+  close: 0,
+  high: 0,
+  low: 0,
+  vol: 0,
+};
 let getQuery = (data, date) => {
   data = validateData(data);
   let query = `('${data["Symbol"]}','${date}',${data["Conf."]},${data["Open"]},${data["High"]},${data["Low"]},${data["Close"]},${data["VWAP"]},${data["Vol"]},${data["Prev. Close"]},${data["Turnover"]},${data["Trans."]},${data["Diff"]}
@@ -59,4 +68,5 @@ let generateQuery = (jsonData, date) => {
 module.exports = {
   generateQuery,
   jsonCompanyData,
+  compareWeekTemplate,
 };
