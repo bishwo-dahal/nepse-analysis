@@ -1,3 +1,6 @@
+const db = require("../../models/index.js");
+const { Op } = require("sequelize");
+
 let validateData = (data) => {
   Object.entries(data).forEach((result) => {
     if (data[result[0]] == "-" || typeof data[result[0]] == "undefined") {
@@ -37,20 +40,22 @@ let jsonCompanyData = {
   a52_weeks_low: 0,
 };
 
-let compareWeekTemplate = {
-  date: "",
-  open: 0,
-  close: 0,
-  high: 0,
-  low: 0,
-  vol: 0,
-};
 let getQuery = (data, date) => {
   data = validateData(data);
   let query = `('${data["Symbol"]}','${date}',${data["Conf."]},${data["Open"]},${data["High"]},${data["Low"]},${data["Close"]},${data["VWAP"]},${data["Vol"]},${data["Prev. Close"]},${data["Turnover"]},${data["Trans."]},${data["Diff"]}
             ,${data["Range"]},${data["Diff %"]},${data["Range %"]},${data["VWAP %"]},${data["120 Days"]},${data["180 Days"]}
             ,${data["52 Weeks High"]},${data["52 Weeks Low"]}) ,`;
   return query;
+};
+
+let allCompanies = async () => {
+  let companies = await db.Company.findAll({
+    attributes: ["symbol"],
+    order: [["symbol", "ASC"]],
+    raw: true,
+  });
+  let onlyCompanies = companies.map((company) => company.symbol);
+  return onlyCompanies;
 };
 
 let generateQuery = (jsonData, date) => {
@@ -68,5 +73,5 @@ let generateQuery = (jsonData, date) => {
 module.exports = {
   generateQuery,
   jsonCompanyData,
-  compareWeekTemplate,
+  allCompanies,
 };

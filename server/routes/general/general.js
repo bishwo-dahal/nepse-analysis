@@ -1,6 +1,6 @@
 const Router = require("express").Router();
 const XLSX = require("xlsx");
-const { jsonCompanyData, generateQuery } = require("./function");
+const { jsonCompanyData, generateQuery, allCompanies } = require("./function");
 const db = require("../../models/index.js");
 const { QueryTypes, Op } = require("sequelize");
 const errors = require("../../errors");
@@ -59,15 +59,6 @@ let lastSevenData = async (dates) => {
     ],
     raw: true,
   });
-};
-let allCompanies = async () => {
-  let companies = await db.Company.findAll({
-    attributes: ["symbol"],
-    order: [["symbol", "ASC"]],
-    raw: true,
-  });
-  let onlyCompanies = companies.map((company) => company.symbol);
-  return onlyCompanies;
 };
 
 Router.post("/import", async (req, res) => {
