@@ -23,7 +23,7 @@
               Refresh The Data
             </button>
           </div>
-          <button class="bg-blue-900 button w-au" @click="importGeneral">
+          <button class="bg-blue-900 button w-au" @click="askToImport">
             Import Data
           </button>
         </div>
@@ -111,10 +111,43 @@ export default {
         confirmButtonText: "Close window",
       });
     },
+    askToImport() {
+      this.$swal({
+        title: "Are you sure to import?",
+        text: `You won't be able to revert this! for ${this.date}`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, Import Data",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.importGeneral();
+        }
+      });
+    },
     getDate: async function () {
       let recentDatas = await this.$axios.get("/general/tradedDate");
       if (recentDatas.data.status == 200) {
         this.recentDates = recentDatas.data.result;
+      }
+    },
+    validateData: async function () {
+      try {
+        let validateImport = await this.$axios.get("/general/validate");
+        if (validateImport.data.status == 400) {
+          this.$swal({
+            icon: "warning",
+            iconColor: "red",
+            title: "Missing Data in Import...❌",
+            text: "Data is incorrect Re visit Data",
+            confirmButtonText: "Recheck",
+          }).then((result) => {
+            this.validateData();
+          });
+        }
+      } catch (error) {
+        console.log(error);
       }
     },
     importGeneral: async function () {
@@ -141,6 +174,7 @@ export default {
   },
   mounted() {
     this.date = new Date().toISOString().slice(0, 10);
+    this.validateData();
     this.getGeneral();
     this.getDate();
   },

@@ -2,7 +2,7 @@ const Router = require("express").Router();
 const XLSX = require("xlsx");
 const { jsonCompanyData, generateQuery, allCompanies } = require("./function");
 const db = require("../../models/index.js");
-const { QueryTypes, Op } = require("sequelize");
+const { QueryTypes, Op, json } = require("sequelize");
 const errors = require("../../errors");
 const { getResponse } = require("../../response");
 
@@ -60,6 +60,26 @@ let lastSevenData = async (dates) => {
     raw: true,
   });
 };
+
+Router.get("/validate", async (req, res) => {
+  let currentWorkBook = XLSX.readFile("./data/share.xlsx");
+  let jsonData = XLSX.utils.sheet_to_json(
+    currentWorkBook.Sheets[currentWorkBook.SheetNames[0]]
+  );
+  let currentErrors = [];
+
+  for (let ctr = 0; ctr < jsonData.length; ctr++) {
+    const data = await jsonData[ctr];
+    const turnOver = await data["Turnover"];
+    if (typeof turnOver == "undefined") {
+      currentErrors.push("Not Valid Data");
+      console.log(data);
+      currentErrors.push(data);
+      break;
+    }
+  }
+  res.send(getResponse(currentErrors, true));
+});
 
 Router.post("/import", async (req, res) => {
   let currentErrors = [];
@@ -308,20 +328,6 @@ Router.get("/compare-percent", async (req, res) => {
 Router.get("/compare-weekly", async (req, res) => {
   let currentErrors = [];
   let result = { dates: [], values: {} };
-  /*
-  "ABC":[
-    {
-      date:1,
-      open:100,
-      close:200
-    },
-    {
-      date:2,
-      open:150,
-      close:250
-    }
-  ]
-  */
 
   try {
     let lastSeven = await db.Traded.findAll({
@@ -347,4 +353,25 @@ Router.get("/compare-weekly", async (req, res) => {
   res.send(getResponse(currentErrors, result));
 });
 
+Router.get("/compare-weekly-percent", async (req, res) => {
+  let currentErrors = [];
+  let result = { dates: [], values: {} };
+});
+
 module.exports = Router;
+
+/*
+Format for /compare-weekly
+  "ABC":[
+    {
+      date:1,
+      open:100,
+      close:200
+    },
+    {
+      date:2,
+      open:150,
+      close:250
+    }
+  ]
+  */
