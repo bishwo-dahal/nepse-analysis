@@ -69,9 +69,24 @@ let generateQuery = (jsonData, date) => {
   query += ";";
   return query;
 };
+let validateExcel = (jsonData) => {
+  if (jsonData.length == 0) {
+    return false;
+  }
+  for (let ctr = 0; ctr < jsonData.length; ctr++) {
+    const data = jsonData[ctr];
+    const turnOver = data["Turnover"];
+    if (typeof turnOver == "undefined") {
+      return false;
+      break;
+    }
+  }
+  return true;
+};
 
 module.exports = {
   generateQuery,
   jsonCompanyData,
   allCompanies,
+  validateExcel,
 };

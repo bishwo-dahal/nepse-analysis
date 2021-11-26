@@ -1,6 +1,11 @@
 const Router = require("express").Router();
 const XLSX = require("xlsx");
-const { jsonCompanyData, generateQuery, allCompanies } = require("./function");
+const {
+  jsonCompanyData,
+  generateQuery,
+  allCompanies,
+  validateExcel,
+} = require("./function");
 const db = require("../../models/index.js");
 const { QueryTypes, Op, json } = require("sequelize");
 const errors = require("../../errors");
@@ -68,15 +73,9 @@ Router.get("/validate", async (req, res) => {
   );
   let currentErrors = [];
 
-  for (let ctr = 0; ctr < jsonData.length; ctr++) {
-    const data = await jsonData[ctr];
-    const turnOver = await data["Turnover"];
-    if (typeof turnOver == "undefined") {
-      currentErrors.push("Not Valid Data");
-      console.log(data);
-      currentErrors.push(data);
-      break;
-    }
+  let validation = validateExcel(jsonData);
+  if (validation === false) {
+    currentErrors.push("There are either more data or invalid data");
   }
   res.send(getResponse(currentErrors, true));
 });
@@ -92,135 +91,139 @@ Router.post("/import", async (req, res) => {
   let extraCompanies = [];
   let noDataCompanies = [];
 
-  try {
-    let allRequiredCompanies = await db.Company.findAll({
-      attributes: ["symbol"],
-      where: {
-        status: "Active",
-      },
-      raw: true,
-    });
-    let requiredCompanies = allRequiredCompanies.map((result) => result.symbol);
-    let availableCompanies = jsonData.map((result) => result["Symbol"]);
+  if (validateExcel(jsonData)) {
+    try {
+      let allRequiredCompanies = await db.Company.findAll({
+        attributes: ["symbol"],
+        where: {
+          status: "Active",
+        },
+        raw: true,
+      });
+      let requiredCompanies = allRequiredCompanies.map(
+        (result) => result.symbol
+      );
+      let availableCompanies = jsonData.map((result) => result["Symbol"]);
 
-    noDataCompanies = requiredCompanies.filter(
-      (comp) => !availableCompanies.includes(comp)
-    );
+      noDataCompanies = requiredCompanies.filter(
+        (comp) => !availableCompanies.includes(comp)
+      );
 
-    //filtering companies on basis of logic
+      //filtering companies on basis of logic
 
-    let totalVolume = 0;
-    let totalTurnOver = 0;
-    jsonData.forEach((result) => {
-      totalVolume += +result["Vol"];
-      totalTurnOver += +result["Turnover"];
-    });
+      let totalVolume = 0;
+      let totalTurnOver = 0;
+      jsonData.forEach((result) => {
+        totalVolume += +result["Vol"];
+        totalTurnOver += +result["Turnover"];
+      });
 
-    /*
+      /*
     Get necessary data
     Insert  date in traded
     If new companies are added then create or update with status active instrument equity and sectors other
     If companies data are not present, get their last date data, create new data with specific values copied post data 
     */
 
-    let tradedValues = {
-      companies: availableCompanies.length,
-      date,
-      volume: totalVolume,
-      turnover: totalTurnOver,
-    };
-
-    // for those which are added today only
-    extraCompanies = availableCompanies.filter((comp) => {
-      console.log(comp);
-      return !requiredCompanies.includes(comp);
-    });
-    console.log(availableCompanies, requiredCompanies, extraCompanies);
-    extraCompanies.forEach(async (company) => {
-      console.log("company name is ", company);
-      let currentCompany = {
-        symbol: company,
-        status: "Active",
-        name: company,
-        sector: "Others",
-        instrument: "Equity",
-        website: "",
+      let tradedValues = {
+        companies: availableCompanies.length,
+        date,
+        volume: totalVolume,
+        turnover: totalTurnOver,
       };
-      //maybe there can be better code for this
 
-      await db.Company.create(currentCompany);
+      // for those which are added today only
+      extraCompanies = availableCompanies.filter((comp) => {
+        console.log(comp);
+        return !requiredCompanies.includes(comp);
+      });
+      console.log(availableCompanies, requiredCompanies, extraCompanies);
+      extraCompanies.forEach(async (company) => {
+        console.log("company name is ", company);
+        let currentCompany = {
+          symbol: company,
+          status: "Active",
+          name: company,
+          sector: "Others",
+          instrument: "Equity",
+          website: "",
+        };
+        //maybe there can be better code for this
 
-      await db.Company.update(
-        { status: "Active" },
-        {
-          where: {
-            symbol: company,
-          },
-        }
-      );
-    });
-    // for those which are not available
-    let lastTradedDate;
-    let lastTraded;
+        await db.Company.create(currentCompany);
 
-    lastTraded = await db.Traded.findOne({
-      attributes: ["date"],
-      order: [["date", "DESC"]],
-      raw: true,
-    });
+        await db.Company.update(
+          { status: "Active" },
+          {
+            where: {
+              symbol: company,
+            },
+          }
+        );
+      });
+      // for those which are not available
+      let lastTradedDate;
+      let lastTraded;
 
-    console.log("lastTRADED = ", lastTraded);
-    if (lastTraded) {
-      lastTradedDate = lastTraded["date"];
-    } else {
-      lastTraded = true;
-    }
-
-    await db.Traded.create(tradedValues);
-
-    if (lastTradedDate) {
-      console.log("last tradeddate is ", lastTradedDate);
-      let leftData = [];
-      leftData = await db.General.findAll({
-        where: {
-          symbol: {
-            [Op.or]: noDataCompanies,
-          },
-          date: lastTradedDate,
-        },
+      lastTraded = await db.Traded.findOne({
+        attributes: ["date"],
+        order: [["date", "DESC"]],
         raw: true,
       });
-      leftData.forEach(async (res) => {
-        let jsonCompany = jsonCompanyData;
-        jsonCompany["symbol"] = res["symbol"];
-        jsonCompany["open"] = res["open"] || 0;
-        jsonCompany["high"] = res["high"] || 0;
-        jsonCompany["low"] = res["low"] || 0;
-        jsonCompany["close"] = res["close"] || 0;
-        jsonCompany["date"] = date;
-        await db.General.create(jsonCompany);
-      });
-    }
 
-    if (!lastTradedDate) {
-      console.log("last traded data is not found", noDataCompanies);
-      noDataCompanies.forEach(async (company) => {
-        let jsonCompany = jsonCompanyData;
-        jsonCompany["symbol"] = company.toUpperCase();
-        jsonCompany["date"] = date;
-        await db.General.create(jsonCompany);
-        // console.log(jsonCompany);
+      console.log("lastTRADED = ", lastTraded);
+      if (lastTraded) {
+        lastTradedDate = lastTraded["date"];
+      } else {
+        lastTraded = true;
+      }
+
+      await db.Traded.create(tradedValues);
+
+      if (lastTradedDate) {
+        console.log("last tradeddate is ", lastTradedDate);
+        let leftData = [];
+        leftData = await db.General.findAll({
+          where: {
+            symbol: {
+              [Op.or]: noDataCompanies,
+            },
+            date: lastTradedDate,
+          },
+          raw: true,
+        });
+        leftData.forEach(async (res) => {
+          let jsonCompany = jsonCompanyData;
+          jsonCompany["symbol"] = res["symbol"];
+          jsonCompany["open"] = res["open"] || 0;
+          jsonCompany["high"] = res["high"] || 0;
+          jsonCompany["low"] = res["low"] || 0;
+          jsonCompany["close"] = res["close"] || 0;
+          jsonCompany["date"] = date;
+          await db.General.create(jsonCompany);
+        });
+      }
+
+      if (!lastTradedDate) {
+        console.log("last traded data is not found", noDataCompanies);
+        noDataCompanies.forEach(async (company) => {
+          let jsonCompany = jsonCompanyData;
+          jsonCompany["symbol"] = company.toUpperCase();
+          jsonCompany["date"] = date;
+          await db.General.create(jsonCompany);
+          // console.log(jsonCompany);
+        });
+      }
+      console.log("json data reached end");
+      let query = generateQuery(jsonData, date);
+      await db.sequelize.query(query, {
+        type: QueryTypes.INSERT,
+        logging: false,
       });
+    } catch (error) {
+      console.log(error);
+      currentErrors.push(error);
     }
-    console.log("json data reached end");
-    let query = generateQuery(jsonData, date);
-    await db.sequelize.query(query, {
-      type: QueryTypes.INSERT,
-      logging: false,
-    });
-  } catch (error) {
-    console.log(error);
-    currentErrors.push(error);
   }
 
   if (currentErrors.length == 0) {
