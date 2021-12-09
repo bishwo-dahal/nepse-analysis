@@ -4,7 +4,7 @@
       <template #title>
         <title-bar icon="trash" text="Delete Last Traded Data" />
       </template>
-      <template #left>. </template>
+      <template #left><span /> </template>
       <template #middle>
         <span
           >Last Traded Date is <b>{{ date }}</b></span
@@ -14,7 +14,7 @@
           Delete For this Date
         </button>
       </template>
-      <template #right>. </template>
+      <template #right><span /> </template>
     </navigation-container>
   </div>
 </template>
