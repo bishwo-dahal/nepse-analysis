@@ -1,5 +1,5 @@
 node_modules/
 *.env
-~$share.xlsx
-share.xlsx
-/server/data/
+# ~$share.xlsx
+*.xlsx
+/server/data/share.xlsx
