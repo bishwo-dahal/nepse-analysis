@@ -23,6 +23,11 @@ const routes = [
     component: GeneralImport,
   },
   {
+    path: "/general/delete-last-traded",
+    name: "DeleteLastTraded",
+    component: () => import("../views/General/DeleteLastTraded.vue"),
+  },
+  {
     path: "/general/compare-percent",
     name: "GeneralPercent",
     component: () => import("../views/General/ComparePercent.vue"),

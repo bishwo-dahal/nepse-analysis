@@ -15,6 +15,32 @@ app.use(router);
 app.use(VueSweetAlert2, {
   allowOutsideClick: false,
 });
+
+app.mixin({
+  methods: {
+    startFireSuccess: function (message) {
+      return this.$swal({
+        icon: "success",
+        iconColor: "blue",
+        title: "Superb!!!",
+        text: message,
+        showConfirmButton: true,
+        confirmButtonText: "Close window",
+      });
+    },
+    startFireAlert: function (message) {
+      return this.$swal({
+        title: "Alert !",
+        text: message,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes",
+      });
+    },
+  },
+});
 app.component("fa", FontAwesomeIcon);
 app.config.globalProperties.$axios = Axios.create({
   baseURL: "http://localhost:3070",

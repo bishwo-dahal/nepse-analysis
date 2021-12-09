@@ -12,6 +12,9 @@
             <router-link to="/general/import"
               >Import <fa icon="file-import"
             /></router-link>
+            <router-link to="/general/delete-last-traded"
+              >Delete Data ! <fa icon="trash"
+            /></router-link>
             <router-link to="/general/compare-percent">
               Compare Percentage <fa icon="percentage"
             /></router-link>

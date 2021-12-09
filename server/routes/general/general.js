@@ -62,6 +62,7 @@ let lastSevenData = async (dates) => {
       ["symbol", "ASC"],
       ["date", "DESC"],
     ],
+    limit: 7,
     raw: true,
   });
 };
@@ -361,6 +362,36 @@ Router.get("/compare-weekly-percent", async (req, res) => {
   let result = { dates: [], values: {} };
 });
 
+Router.delete("/last-traded", async (req, res) => {
+  let currentErrors = [];
+  let result = { date: "" };
+  try {
+    let lastTraded = await db.Traded.findOne({
+      attributes: ["date"],
+      order: [["date", "DESC"]],
+      raw: true,
+    });
+    if (lastTraded) {
+      let lastDate = lastTraded.date;
+      result.date = lastDate;
+      await db.General.destroy({
+        where: {
+          date: lastDate,
+        },
+      });
+      await db.Traded.destroy({
+        where: {
+          date: lastDate,
+        },
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    currentErrors.push(error);
+  }
+
+  res.send(getResponse(currentErrors, result));
+});
 module.exports = Router;
 
 /*
