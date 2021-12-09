@@ -61,6 +61,17 @@
     </navigation-container>
 
     <div>
+      <div v-if="summary.turnover">
+        <div>
+          Total TurnOver <b class="text-xl">{{ summary.turnover }}</b>
+        </div>
+        <div>
+          Total Companies <b class="text-xl">{{ summary.traded }}</b>
+        </div>
+        <div>
+          Total Volume <b class="text-xl">{{ summary.volume }}</b>
+        </div>
+      </div>
       <table v-html="htmlResult"></table>
     </div>
   </div>
@@ -83,6 +94,7 @@ export default {
       created: [],
       response: false,
       recentDates: [],
+      summary: {},
     };
   },
   methods: {
@@ -90,6 +102,17 @@ export default {
       let result = await this.$axios.get("/general/html");
       result = result.data.substring(90);
       this.htmlResult = result.substring(0, result.length - 22);
+    },
+    calculateTodaySummary: async function () {
+      try {
+        let todaySummary = await this.$axios.get("/general/today-summary");
+        if (todaySummary.data.status === 200) {
+          this.summary = todaySummary.data.result;
+          console.log(todaySummary.data.result);
+        }
+      } catch (error) {
+        console.log(error);
+      }
     },
     fireAlert(message) {
       this.$swal({
@@ -143,7 +166,9 @@ export default {
             text: "Data is incorrect Re visit Data",
             confirmButtonText: "Recheck",
           }).then((result) => {
-            this.validateData();
+            if (result.isConfirmed) {
+              this.validateData();
+            }
           });
         }
       } catch (error) {
@@ -177,6 +202,7 @@ export default {
     this.validateData();
     this.getGeneral();
     this.getDate();
+    this.calculateTodaySummary();
   },
 };
 </script>

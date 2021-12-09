@@ -81,6 +81,26 @@ Router.get("/validate", async (req, res) => {
   res.send(getResponse(currentErrors, true));
 });
 
+Router.get("/today-summary", async (req, res) => {
+  let currentErrors = [];
+  let result = { turnover: 0, volume: 0, traded: 0 };
+  let currentWorkBook = XLSX.readFile("./data/share.xlsx");
+  let jsonData = XLSX.utils.sheet_to_json(
+    currentWorkBook.Sheets[currentWorkBook.SheetNames[0]]
+  );
+  let totalVolume = 0;
+  let totalTurnOver = 0;
+  let totalCompany = jsonData.length - 1;
+  jsonData.forEach((result) => {
+    totalVolume += +result["Vol"];
+    totalTurnOver += +result["Turnover"];
+  });
+  result.turnover = totalTurnOver;
+  result.volume = totalVolume;
+  result.traded = totalCompany;
+  res.send(getResponse([], result));
+});
+
 Router.post("/import", async (req, res) => {
   let currentErrors = [];
   let currentWorkBook = XLSX.readFile("./data/share.xlsx");
