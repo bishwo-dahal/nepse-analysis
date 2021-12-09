@@ -77,7 +77,6 @@ export default {
   },
   methods: {
     generateValid: function () {
-      console.log("from watch");
       let datas = this.totalData;
       let finalResult = [];
       let ctr = 0;

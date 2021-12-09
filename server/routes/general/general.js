@@ -62,7 +62,6 @@ let lastSevenData = async (dates) => {
       ["symbol", "ASC"],
       ["date", "DESC"],
     ],
-    limit: 7,
     raw: true,
   });
 };
