@@ -61,15 +61,21 @@
     </navigation-container>
 
     <div>
-      <div v-if="summary.turnover">
+      <div
+        v-if="summary.turnover"
+        class="font-bold text-xl font-sans text-justify m-5"
+      >
         <div>
-          Total TurnOver <b class="text-xl">{{ summary.turnover }}</b>
+          Total TurnOver:
+          <span class="text-purple-700">{{ summary.turnover }}</span>
         </div>
         <div>
-          Total Companies <b class="text-xl">{{ summary.traded }}</b>
+          Total Companies:
+          <span class="text-purple-700">{{ summary.traded }}</span>
         </div>
         <div>
-          Total Volume <b class="text-xl">{{ summary.volume }}</b>
+          Total Volume:
+          <span class="text-purple-700">{{ summary.volume }}</span>
         </div>
       </div>
       <table v-html="htmlResult"></table>
