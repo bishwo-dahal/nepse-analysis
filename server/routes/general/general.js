@@ -90,7 +90,7 @@ Router.get("/today-summary", async (req, res) => {
   );
   let totalVolume = 0;
   let totalTurnOver = 0;
-  let totalCompany = jsonData.length - 1;
+  let totalCompany = jsonData.length;
   jsonData.forEach((result) => {
     totalVolume += +result["Vol"];
     totalTurnOver += +result["Turnover"];
