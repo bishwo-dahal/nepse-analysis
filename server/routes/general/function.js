@@ -83,10 +83,25 @@ let validateExcel = (jsonData) => {
   }
   return true;
 };
+let percentageDifference = (previous, current) => {
+  previous = +previous;
+  current = +current;
+  if (previous == 0) {
+    if (current !== 0) {
+      return 100;
+    } else {
+      return 0;
+    }
+  }
+
+  let diff = ((current - previous) / previous) * 100;
+  return parseFloat(diff.toPrecision(2));
+};
 
 module.exports = {
   generateQuery,
   jsonCompanyData,
   allCompanies,
   validateExcel,
+  percentageDifference,
 };

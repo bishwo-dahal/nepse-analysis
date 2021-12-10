@@ -47,6 +47,16 @@
             />
             <label for="low">Close</label>
           </span>
+          <span>
+            <input
+              type="radio"
+              id="vol"
+              value="vol"
+              name="type"
+              v-model="type"
+            />
+            <label for="vol">Volume</label>
+          </span>
         </div>
       </template>
     </navigation-container>

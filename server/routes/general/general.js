@@ -5,6 +5,7 @@ const {
   generateQuery,
   allCompanies,
   validateExcel,
+  percentageDifference,
 } = require("./function");
 const db = require("../../models/index.js");
 const { QueryTypes, Op, json } = require("sequelize");
@@ -50,7 +51,7 @@ Router.get("/tradedDate", async (req, res) => {
   }
 });
 
-let lastSevenData = async (dates) => {
+let lastSpecifiedData = async (dates) => {
   return await db.General.findAll({
     attributes: ["date", "symbol", "open", "close", "high", "low", "vol"],
     where: {
@@ -361,7 +362,7 @@ Router.get("/compare-weekly", async (req, res) => {
     let lastSevenDate = lastSeven.map((date) => date.date);
     result.dates = lastSevenDate;
     let companies = await allCompanies();
-    let lastSevenResult = await lastSevenData(lastSevenDate);
+    let lastSevenResult = await lastSpecifiedData(lastSevenDate);
     for (const company of companies) {
       let filteredCompany = lastSevenResult.filter(
         (data) => data.symbol == company
@@ -379,6 +380,45 @@ Router.get("/compare-weekly", async (req, res) => {
 Router.get("/compare-weekly-percent", async (req, res) => {
   let currentErrors = [];
   let result = { dates: [], values: {} };
+  try {
+    let lastEight = await db.Traded.findAll({
+      order: [["date", "DESC"]],
+      raw: true,
+      limit: 8, // it is sufficient for comparing 7 datas.
+    });
+    let lastEightDate = lastEight.map((date) => date.date);
+    result.dates = lastEightDate;
+    let companies = await allCompanies();
+    let lastEightResult = await lastSpecifiedData(lastEightDate);
+    for (const company of companies) {
+      let filteredCompany = lastEightResult.filter(
+        (data) => data.symbol == company
+      );
+      let finalFilteredCompany = [];
+
+      for (let ctr = 0; ctr < filteredCompany.length - 1; ctr++) {
+        const current = filteredCompany[ctr];
+        const next = filteredCompany[ctr + 1];
+        let currentCompare = {
+          date: `${current.date}-${next.date}`,
+          symbol: current.symbol,
+          open: percentageDifference(current.open, next.open),
+          close: percentageDifference(current.close, next.close),
+          high: percentageDifference(current.high, next.high),
+          low: percentageDifference(current.low, next.low),
+          vol: percentageDifference(current.vol, next.vol),
+        };
+        finalFilteredCompany.push(currentCompare);
+      }
+
+      result.values[company] = [];
+      result.values[company].push(...finalFilteredCompany);
+    }
+  } catch (error) {
+    console.log(error);
+    currentErrors.push(error);
+  }
+  res.send(getResponse(currentErrors, result));
 });
 
 Router.delete("/last-traded", async (req, res) => {

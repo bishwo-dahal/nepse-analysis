@@ -46,11 +46,14 @@ export default {
   },
   methods: {
     calcClass: function (val) {
-      if (typeof val == "undefined" || isNaN(+val)) {
+      if (typeof val == "undefined") {
         return "stock-blank";
       }
       if (isNaN(+val)) {
         return "stock-blank";
+      }
+      if (+val == 0) {
+        return "stock-unchanged";
       }
       if (+val > 0) {
         return "stock-up";
