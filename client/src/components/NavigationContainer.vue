@@ -10,7 +10,7 @@
         <div class="flex justify-items-start w-1/4">
           <div class="grid">
             <!-- left portion goes here -->
-            <slot name="left"> LEFT </slot>
+            <slot name="left"> </slot>
           </div>
         </div>
         <!-- for middle option -->
@@ -21,7 +21,7 @@
         </div>
         <!-- for right portion -->
         <div class="flex items-center justify-center w-1/4">
-          <slot name="right"> RIGHT </slot>
+          <slot name="right"> </slot>
         </div>
       </div>
     </div>

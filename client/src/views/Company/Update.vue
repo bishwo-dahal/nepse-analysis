@@ -1,10 +1,22 @@
 <template>
   <div>
-    <select v-model="selectedCompany">
-      <option v-for="company in companiesList" :key="company" :value="company">
-        {{ company }}
-      </option>
-    </select>
+    <navigation-container>
+      <template #title>
+        <title-bar icon="cloud" text="Update Company Data" />
+      </template>
+      <template #middle>
+        <h3>Select Company Here:</h3>
+        <select v-model="selectedCompany">
+          <option
+            v-for="company in companiesList"
+            :key="company"
+            :value="company"
+          >
+            {{ company }}
+          </option>
+        </select>
+      </template>
+    </navigation-container>
 
     <div v-if="typeof companyData.s_no != 'undefined'" class="grid">
       <span class="bg-blue-700 p-3 mt-5 text-white"
@@ -80,12 +92,16 @@
             />
           </div>
         </div>
-        <textarea
-          v-model="newCompanyData.info"
-          class="w-full border-2 border-green-700 p-3 mt-5"
-          style="height: 140px"
-        ></textarea>
-
+        <div class="p-4">
+          <h2 class="underline">
+            Enter More Information about {{ companyData.symbol }}
+          </h2>
+          <textarea
+            v-model="newCompanyData.info"
+            class="w-full border-2 border-green-700 p-3 mt-5"
+            style="height: 140px"
+          ></textarea>
+        </div>
         <br />
         <button class="button bg-blue-800" @click="updateCompany">
           Update Company
@@ -96,8 +112,14 @@
 </template>
 
 <script>
+import NavigationContainer from "../../components/NavigationContainer.vue";
+import TitleBar from "../../components/TitleBar.vue";
 export default {
   name: "Update",
+  components: {
+    NavigationContainer,
+    TitleBar,
+  },
   data() {
     return {
       companiesList: [],
