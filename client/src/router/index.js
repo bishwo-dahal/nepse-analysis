@@ -18,6 +18,11 @@ const routes = [
       import(/* webpackChunkName: "about" */ "../views/About.vue"),
   },
   {
+    path: "/dashboard",
+    name: "MainDashboard",
+    component: () => import("../views/Dashboard/Dashboard.vue"),
+  },
+  {
     path: "/general/import",
     name: "GeneralImport",
     component: GeneralImport,
