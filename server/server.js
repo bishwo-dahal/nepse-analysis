@@ -39,7 +39,7 @@ app.get("/api/readExcel", async (req, res) => {
 
 app.use(express.static(__dirname + "/dist"));
 
-app.listen(PORT, HOST, (err) => {
+app.listen(PORT, (err) => {
   if (err) {
     console.log("Error found");
   } else {
