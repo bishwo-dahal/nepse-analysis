@@ -12,8 +12,8 @@
     "@fortawesome/free-solid-svg-icons": "^5.15.4",
     "@fortawesome/vue-fontawesome": "^3.0.0-5",
     "@tailwindcss/postcss7-compat": "^2.0.2",
-    "autoprefixer": "^9",
-    "axios": "^0.24.0",
+    "autoprefixer": "^9.0.0",
+    "axios": "^1.6.5",
     "chart.js": "^3.6.2",
     "core-js": "^3.6.5",
     "postcss": "^7",
@@ -23,13 +23,13 @@
     "vue-sweetalert2": "^5.0.2"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "~4.5.0",
-    "@vue/cli-plugin-eslint": "~4.5.0",
-    "@vue/cli-plugin-router": "~4.5.0",
-    "@vue/cli-service": "~4.5.0",
+    "@vue/cli-plugin-babel": "^5.0.8",
+    "@vue/cli-plugin-eslint": "^5.0.8",
+    "@vue/cli-plugin-router": "^5.0.8",
+    "@vue/cli-service": "^5.0.8",
     "@vue/compiler-sfc": "^3.0.0",
     "babel-eslint": "^10.1.0",
-    "eslint": "^6.7.2",
+    "eslint": "^7.32.0",
     "eslint-plugin-vue": "^7.0.0",
     "vue-cli-plugin-tailwind": "~2.0.6"
   }

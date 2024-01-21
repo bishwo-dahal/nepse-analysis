@@ -43,6 +43,6 @@ app.mixin({
 });
 app.component("fa", FontAwesomeIcon);
 app.config.globalProperties.$axios = Axios.create({
-  baseURL: "http://localhost:3070",
+  baseURL: "/api/",
 });
 app.mount("#app");

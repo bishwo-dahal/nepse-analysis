@@ -1,11 +1,16 @@
 "use strict";
 const { Sequelize } = require("sequelize");
 let db = {};
-let sequelize = new Sequelize("nepse_general", "root", "" /**/, {
-  dialect: "mysql",
-  host: "localhost",
-  logging: console.log,
-});
+let sequelize = new Sequelize(
+  process.env.DATABASE || "nepse_general",
+  process.env.DB_USERNAME || "root",
+  process.env.PASSWORD || "" /**/,
+  {
+    dialect: "mysql",
+    host: process.env.HOST || "127.0.0.1",
+    logging: console.log,
+  }
+);
 let General = sequelize.define("General", require("./General"), {
   tableName: "general",
   timestamps: false,

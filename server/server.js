@@ -7,7 +7,7 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: "*",
+    origin: "http://localhost:8081",
     credentials: true,
   })
 );
@@ -22,20 +22,23 @@ const db = require("./models");
 db.sequelize.authenticate();
 // db.sequelize.sync({ alter: true });
 
-app.use("/", require("./routes/routes"));
+app.use("/api/", require("./routes/routes"));
 
-app.get("/", (req, res) => {
+app.get("/api/", (req, res) => {
   res.send({
     status: true,
   });
 });
-app.get("/readExcel", async (req, res) => {
+app.get("/api/readExcel", async (req, res) => {
   let currentWorkBook = XLSX.readFile("./data/share.xlsx");
   let htmlData = XLSX.utils.sheet_to_html(
     currentWorkBook.Sheets[currentWorkBook.SheetNames[0]]
   );
   res.send(htmlData);
 });
+
+app.use(express.static(__dirname + "/dist"));
+
 app.listen(PORT, HOST, (err) => {
   if (err) {
     console.log("Error found");
